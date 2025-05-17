@@ -1,9 +1,0 @@
-services:
-  app:
-    environment:
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
-      - NODE_ENV
-    env_file:
-      - .env

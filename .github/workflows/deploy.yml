@@ -1,4 +1,4 @@
-name: Deploy Docker to AWS ECS
+name: Deploy to Render
 
 on:
   push:
@@ -10,25 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Check out the repository
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Log in to Amazon ECR
-    - name: Log in to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v1
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'yarn'
 
-    # Build and push Docker image to ECR
-    - name: Build and push Docker image
-      run: |
-        IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-repo-name:latest
-        docker build -t $IMAGE_URI .
-        docker push $IMAGE_URI
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-    # Deploy to ECS
-    - name: Deploy to ECS
-      run: |
-        aws ecs update-service \
-          --cluster your-cluster-name \
-          --service your-service-name \
-          --force-new-deployment
+      - name: Build the app
+        run: yarn build
+
+      - name: Deploy to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          curl -X POST \
+          -H "Authorization: Bearer $RENDER_API_KEY" \
+          -H "Content-Type: application/json" \
+          --data '{"serviceId":"<YOUR_SERVICE_ID>","clearCache":true}' \
+          https://api.render.com/v1/services/<YOUR_SERVICE_ID>/deploys
