@@ -3,27 +3,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: diucse-alumni-api
-    image: diucse-alumni-api-${NODE_ENV}
     ports:
       - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    depends_on:
-      - db
-
-  db:
-    image: postgres:17-alpine
-    container_name: postgres
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+    command: yarn start:prod
