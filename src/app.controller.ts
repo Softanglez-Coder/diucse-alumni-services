@@ -4,7 +4,12 @@ import { Controller, Get } from '@nestjs/common';
 export class AppController {
   @Get()
   sayHello(): string {
-    return `Hello, from CSE DIU Alumni APIs. Please visit our website: https://csediualumni.com to know more. If you are technical guy and looking for good stuff, please explore API documentation at https://csediualumni.com/api-docs`;
+    return `
+        Hello, from CSE DIU Alumni APIs. 
+        Please visit our website: https://csediualumni.com to know more. 
+        If you are technical guy and looking for good stuff, 
+        please explore API documentation at https://csediualumni.com/api-docs
+      `;
   }
 
   @Get('health')
