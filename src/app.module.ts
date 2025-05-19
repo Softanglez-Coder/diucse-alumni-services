@@ -14,13 +14,15 @@ import { UserModule } from './user/user.module';
 import { PaymentModule } from './payment/payment.module';
 import { StorageModule } from './storage/storage.module';
 import { MediaModule } from './media/media.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'local'}`,
+      envFilePath: ['.env'],
       isGlobal: true,
     }),
+    DatabaseModule,
     AuthModule,
     EventModule,
     GalleryModule,

@@ -51,3 +51,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # environment files
 .env
 !.env.example
+
+# credentials
+credentials.json
