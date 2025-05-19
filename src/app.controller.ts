@@ -1,12 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  @Get()
+  sayHello(): string {
+    return `Hello, from CSE DIU Alumni APIs. Please visit our website: https://csediualumni.com to know more. If you are technical guy and looking for good stuff, please explore API documentation at https://csediualumni.com/api-docs`;
+  }
 
   @Get('health')
-  getHello(): string {
-    return this.appService.getHello();
+  checkHealth(): string {
+    return `Hey! I am alive.`;
   }
 }
