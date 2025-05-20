@@ -11,20 +11,4 @@ export class MediaRepository {
     const created = new this.media(media);
     return await created.save();
   }
-
-  async findAll(): Promise<Media[]> {
-    return await this.media.find().exec();
-  }
-
-  async findById(id: string): Promise<Media> {
-    return await this.media.findById(id).exec();
-  }
-
-  async updateById(id: string, media: Media): Promise<Media> {
-    return await this.media.findByIdAndUpdate(id, media, { new: true }).exec();
-  }
-
-  async deleteById(id: string): Promise<Media> {
-    return await this.media.findByIdAndDelete(id).exec();
-  }
 }

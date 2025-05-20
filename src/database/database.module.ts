@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import * as process from 'node:process';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
