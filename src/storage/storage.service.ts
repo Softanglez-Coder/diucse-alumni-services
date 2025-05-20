@@ -1,32 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import { GoogleDriveService } from 'nestjs-google-drive';
-import { MediaService } from '../media/media.service';
-import { CreateMediaDto } from '../media/dto/create-media.dto';
+import { Inject, Injectable } from '@nestjs/common';
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
+import { Readable } from 'stream';
 
 @Injectable()
 export class StorageService {
-  private readonly folderId: string = process.env.G_DRIVE_FOLDER_ID;
-
-  constructor(
-    private readonly gDriveService: GoogleDriveService,
-    private readonly mediaService: MediaService,
-  ) {}
+  constructor(@Inject('CLOUDINARY') private client: typeof cloudinary) {}
 
   async upload(file: Express.Multer.File) {
     if (!file) {
       throw new Error('No file provided');
     }
 
-    try {
-      const url = await this.gDriveService.uploadFile(file, this.folderId);
+    const stream = Readable.from(file.buffer);
+    return new Promise((resolve, reject) => {
+      const uploadStream = this.client.uploader.upload_stream(
+        { resource_type: 'auto' }, // auto supports PDF, image, etc.
+        (error, result: UploadApiResponse) => {
+          if (error) {
+            return reject(error);
+          }
 
-      const media = new CreateMediaDto();
-      media.url = url;
+          resolve(result.secure_url);
+        },
+      );
 
-      const created = await this.mediaService.create(media);
-      return created;
-    } catch (e) {
-      throw new Error(`Error uploading file: ${e.message}`);
-    }
+      stream.pipe(uploadStream);
+    });
   }
 }

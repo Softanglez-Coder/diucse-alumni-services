@@ -11,7 +11,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         uri: config.get<string>('MONGODB_URI'),
       }),
       inject: [ConfigService],
-    })
-  ]
+    }),
+  ],
 })
 export class DatabaseModule {}

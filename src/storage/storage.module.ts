@@ -1,23 +1,27 @@
 import { Module } from '@nestjs/common';
 import { StorageService } from './storage.service';
-import { StorageController } from './storage.controller';
-import { GoogleDriveModule } from 'nestjs-google-drive';
-import * as process from 'node:process';
-import { MediaModule } from '../media/media.module';
+import { ConfigService } from '@nestjs/config';
+import { v2 as cloudinary } from 'cloudinary';
 
 @Module({
-  imports: [
-    GoogleDriveModule.register({
-      clientId: process.env.G_DRIVE_CLIENT_ID,
-      clientSecret: process.env.G_DRIVE_CLIENT_SECRET,
-      redirectUrl: process.env.G_DRIVE_REDIRECT_URL,
-      refreshToken: process.env.G_DRIVE_REFRESH_TOKEN,
-    }),
-    MediaModule,
-  ],
-  controllers: [StorageController],
+  imports: [],
+  controllers: [],
+  exports: [StorageService],
   providers: [
-    StorageService
+    StorageService,
+    {
+      provide: 'CLOUDINARY',
+      useFactory: (configService: ConfigService) => {
+        cloudinary.config({
+          cloud_name: configService.get<string>('CLOUDINARY_CLOUD_NAME'),
+          api_key: configService.get<string>('CLOUDINARY_API_KEY'),
+          api_secret: configService.get<string>('CLOUDINARY_API_SECRET'),
+        });
+
+        return cloudinary;
+      },
+      inject: [ConfigService],
+    },
   ],
 })
 export class StorageModule {}

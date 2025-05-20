@@ -4,6 +4,7 @@ import { MediaController } from './media.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Media, MediaSchema } from './schemas/media.schema';
 import { MediaRepository } from './media.repository';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
   imports: [
@@ -13,14 +14,10 @@ import { MediaRepository } from './media.repository';
         schema: MediaSchema,
       },
     ]),
+    StorageModule,
   ],
   controllers: [MediaController],
-  exports: [
-    MediaService
-  ],
-  providers: [
-    MediaService,
-    MediaRepository
-  ],
+  exports: [MediaService],
+  providers: [MediaService, MediaRepository],
 })
 export class MediaModule {}

@@ -37,9 +37,7 @@ import { DatabaseModule } from './database/database.module';
     StorageModule,
     MediaModule,
   ],
-  controllers: [
-    AppController
-  ],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
