@@ -15,6 +15,8 @@ import { PaymentModule } from './payment/payment.module';
 import { StorageModule } from './storage/storage.module';
 import { MediaModule } from './media/media.module';
 import { DatabaseModule } from './database/database.module';
+import { CountryModule } from './country/country.module';
+import { ShiftModule } from './shift/shift.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { DatabaseModule } from './database/database.module';
     PaymentModule,
     StorageModule,
     MediaModule,
+    CountryModule,
+    ShiftModule
   ],
   controllers: [AppController],
   providers: [],
