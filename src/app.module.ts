@@ -17,6 +17,7 @@ import { MediaModule } from './media/media.module';
 import { DatabaseModule } from './database/database.module';
 import { CountryModule } from './country/country.module';
 import { ShiftModule } from './shift/shift.module';
+import { BatchModule } from './batch/batch.module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { ShiftModule } from './shift/shift.module';
     StorageModule,
     MediaModule,
     CountryModule,
-    ShiftModule
+    ShiftModule,
+    BatchModule
   ],
   controllers: [AppController],
   providers: [],

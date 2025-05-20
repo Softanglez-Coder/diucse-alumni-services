@@ -4,16 +4,16 @@ import {
   Post,
   Body,
 } from '@nestjs/common';
-import { ShiftService } from './shift.service';
-import { CreateShiftDto } from './dto/create-shift.dto';
+import { BatchService } from './batch.service';
+import { CreateBatchDto } from './dto/create-batch.dto';
 import { Public } from '../auth/decorators/public.decorator';
 
-@Controller('shift')
-export class ShiftController {
-  constructor(private readonly service: ShiftService) {}
+@Controller('batch')
+export class BatchController {
+  constructor(private readonly service: BatchService) {}
 
   @Post()
-  async create(@Body() dto: CreateShiftDto) {
+  async create(@Body() dto: CreateBatchDto) {
     return await this.service.create(dto);
   }
 
