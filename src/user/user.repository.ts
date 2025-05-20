@@ -1,34 +1,52 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from './schemas/user.schema';
+import { User } from './user.schema';
+import { Role } from '../auth/role';
 
 @Injectable()
 export class UserRepository {
-  constructor(@InjectModel(User.name) private user: Model<User>) {}
-
-  async create(user: User) {
-    const created = new this.user(user);
-    return await created.save();
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>
+  ) {}
+  
+  async create(user: User): Promise<User> {
+    const newUser = new this.userModel(user);
+    return await newUser.save();
   }
 
-  async remove(id: string) {
-    return await this.user.deleteOne({ _id: id }).exec();
+  async findByUsername(username: string): Promise<User> {
+    const existing = await this.userModel.findOne({ username });
+    return existing;
   }
 
-  async findAll() {
-    return await this.user.find().exec();
+  async updateUsername(username: string, newUsername: string): Promise<User> {
+    const user = await this.findByUsername(username);
+    user.username = newUsername;
+    return await user.save();
   }
 
-  async update(id: string, user: User) {
-    return await this.user.updateOne({ _id: id }, user).exec();
+  async updatePassword(username: string, hash: string): Promise<User> {
+    const user = await this.findByUsername(username);
+    user.hash = hash;
+    return await user.save();
   }
 
-  async findById(id: string) {
-    return await this.user.findById(id).exec();
+  async activate(username: string): Promise<User> {
+    const user = await this.findByUsername(username);
+    user.active = true;
+    return await user.save();
   }
 
-  async findByAuth0Id(auth0Id: string) {
-    return await this.user.findOne({ auth0Id }).exec();
+  async deactivate(username: string): Promise<User> {
+    const user = await this.findByUsername(username);
+    user.active = false;
+    return await user.save();
+  }
+
+  async updateRoles(username: string, roles: Role[]): Promise<User> {
+    const user = await this.findByUsername(username);
+    user.roles = roles;
+    return await user.save();
   }
 }

@@ -1,21 +1,42 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { PassportModule } from '@nestjs/passport';
-import { Auth0Strategy } from './strategies/auth0.strategy';
 import { UserModule } from '../user/user.module';
+import { JwtModule } from '@nestjs/jwt';
+import * as process from 'node:process';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './guards/auth.guard';
+import { RolesGuard } from './guards/roles.guard';
+import { MongooseModule } from '@nestjs/mongoose';
+import { RefreshToken, RefreshTokenSchema } from './refresh-token.schema';
+import { RefreshTokenRepository } from './refresh-token.repository';
 
 @Module({
   imports: [
-    PassportModule.register({
-      defaultStrategy: 'auth0',
+    UserModule,
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET
     }),
-    UserModule
+    MongooseModule.forFeature([
+      {
+        name: RefreshToken.name,
+        schema: RefreshTokenSchema,
+      },
+    ]),
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
-    Auth0Strategy,
+    RefreshTokenRepository,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AuthModule {}

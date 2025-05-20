@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRepository } from './user.repository';
-import { UserDto } from './dto/user.dto';
-import { User } from './schemas/user.schema';
+import { CreateUserDto, UserDto } from './dtos';
+import { User } from './user.schema';
+import { Role } from '../auth/role';
 
 @Injectable()
 export class UserService {
@@ -11,81 +10,153 @@ export class UserService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async create(dto: CreateUserDto) {
-    const user = new User();
-    user.auth0Id = dto.auth0Id;
-    user.name = dto.name;
-    user.email = dto.email;
-    user.picture = dto.picture;
+  async create(dto: CreateUserDto): Promise<UserDto> {
+    const { username, hash } = dto;
+    if (!username) {
+      throw new Error('Username is required');
+    }
 
-    const created = await this.userRepository.create(user);
+    const existingUser = await this.userRepository.findByUsername(username);
+    if (existingUser) {
+      throw new Error('Username already exists');
+    }
 
-    if (!created) {
-      return null;
+    const newUser = new User();
+    newUser.username = username;
+    newUser.hash = hash;
+    newUser.active = true;
+
+    const created = await this.userRepository.create(newUser);
+
+    const userDto = new UserDto();
+    userDto.username = created.username;
+    userDto.active = created.active;
+    userDto.roles = created.roles;
+
+    delete userDto.hash;
+
+    return userDto;
+  }
+
+  async findByUsername(username: string): Promise<UserDto> {
+    const existingUser = await this.userRepository.findByUsername(username);
+    if (!existingUser) {
+      throw new Error('User does not exist');
     }
 
     const userDto = new UserDto();
-    userDto.id = created.id;
-    userDto.name = created.name;
-    userDto.email = created.email;
-    userDto.picture = created.picture;
+    userDto.username = existingUser.username;
+    userDto.active = existingUser.active;
+    userDto.roles = existingUser.roles;
 
-    return user;
+    delete userDto.hash;
+
+    return existingUser;
   }
 
-  async findAll() {
-    return await this.userRepository.findAll();
-  }
-
-  async findOne(id: string) {
-    return await this.userRepository.findById(id);
-  }
-
-  async update(id: string, dto: UpdateUserDto) {
-    const userDocument = await this.userRepository.findById(id);
-
-    if (!userDocument) {
-      return null;
+  async activate(username: string): Promise<UserDto> {
+    const existingUser = await this.userRepository.findByUsername(username);
+    if (!existingUser) {
+      throw new Error('User does not exist');
     }
 
-    userDocument.name = dto.name;
-    userDocument.email = dto.email;
-    userDocument.picture = dto.picture;
-
-    const updated = await this.userRepository.update(id, userDocument);
-
-    if (!updated) {
-      return null;
+    if (existingUser.active) {
+      throw new Error('User is already active');
     }
 
-    const user = new UserDto();
-    user.id = id;
-    user.auth0Id = userDocument.auth0Id;
-    user.name = userDocument.name;
-    user.email = userDocument.email;
-    user.picture = userDocument.picture;
+    const user = await this.userRepository.activate(username);
 
-    return user;
+    const userDto = new UserDto();
+    userDto.username = user.username;
+    userDto.active = user.active;
+    userDto.roles = user.roles;
+
+    delete userDto.hash;
+
+    return userDto;
   }
 
-  async remove(id: string) {
-    return await this.userRepository.remove(id);
-  }
-
-  async findByAuth0Id(auth0Id: string) {
-    const userDocument = await this.userRepository.findByAuth0Id(auth0Id);
-
-    if (!userDocument) {
-      return null;
+  async deactivate(username: string): Promise<UserDto> {
+    const existingUser = await this.userRepository.findByUsername(username);
+    if (!existingUser) {
+      throw new Error('User does not exist');
     }
 
-    const user = new UserDto();
-    user.id = userDocument.id;
-    user.auth0Id = userDocument.auth0Id;
-    user.name = userDocument.name;
-    user.email = userDocument.email;
-    user.picture = userDocument.picture;
+    if (!existingUser.active) {
+      throw new Error('User is already inactive');
+    }
 
-    return user;
+    const user = await this.userRepository.deactivate(username);
+    const userDto = new UserDto();
+    userDto.username = user.username;
+    userDto.active = user.active;
+    userDto.roles = user.roles;
+
+    delete userDto.hash;
+
+    return userDto;
+  }
+
+  async updateUsername(
+    username: string,
+    newUsername: string,
+  ): Promise<UserDto> {
+    const existingUser = await this.userRepository.findByUsername(username);
+    if (!existingUser) {
+      throw new Error('User does not exist');
+    }
+
+    const usernameExists = await this.userRepository.findByUsername(newUsername);
+    if (usernameExists) {
+      throw new Error('Username already occupied by another user');
+    }
+
+    const user = await this.userRepository.updateUsername(
+      username,
+      newUsername,
+    );
+
+    const userDto = new UserDto();
+    userDto.username = user.username;
+    userDto.active = user.active;
+    userDto.roles = user.roles;
+
+    delete userDto.hash;
+
+    return userDto;
+  }
+
+  async updatePassword(username: string, hash: string): Promise<UserDto> {
+    const existingUser = await this.userRepository.findByUsername(username);
+    if (!existingUser) {
+      throw new Error('User does not exist');
+    }
+
+    const user = await this.userRepository.updatePassword(username, hash);
+    const userDto = new UserDto();
+    userDto.username = user.username;
+    userDto.active = user.active;
+    userDto.roles = user.roles;
+
+    delete userDto.hash;
+
+    return userDto;
+  }
+
+  async exists(username: string) {
+    const existing = await this.userRepository.findByUsername(username);
+    return !!existing;
+  }
+
+  async updateRoles(username: string, roles: Role[]) {
+    const user = await this.userRepository.findByUsername(username);
+    if (!user) {
+      throw new Error('User does not exist');
+    }
+
+    const updated = await this.userRepository.updateRoles(username, roles);
+    delete updated.hash;
+
+    return updated;
   }
 }
