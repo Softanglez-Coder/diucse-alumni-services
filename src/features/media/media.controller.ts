@@ -36,7 +36,13 @@ export class MediaController {
     @Query('$skip') skip?: number,
     @Query('$select') select?: string[],
   ) {
-    const media = await this.mediaService.findAll({ search, sort, limit, skip, select });
+    const media = await this.mediaService.findAll({
+      search,
+      sort,
+      limit,
+      skip,
+      select,
+    });
     return media;
   }
 

@@ -13,14 +13,14 @@ export class BaseRepository<T extends Document> {
     if (typeof search === 'string' && search.trim() !== '') {
       // Get schema paths (field names)
       const stringFields = Object.entries(this._model.schema.paths)
-        .filter(([_, v]: [string, any]) => v.instance === 'String')
+        .filter(([, v]: [string, any]) => v.instance === 'String')
         .map(([k]) => k);
 
       // Build $or filter
       filter = {
-        $or: stringFields.map(field => ({
-          [field]: { $regex: search, $options: 'i' }
-        }))
+        $or: stringFields.map((field) => ({
+          [field]: { $regex: search, $options: 'i' },
+        })),
       };
     }
 
@@ -29,7 +29,7 @@ export class BaseRepository<T extends Document> {
       .sort(sort || 'createdAt -1')
       .select(select || '')
       .skip(+(skip || 0))
-      .limit((+limit || 10))
+      .limit(+limit || 10)
       .exec();
   }
 
