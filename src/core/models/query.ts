@@ -5,4 +5,6 @@ export class Query {
   search: string = '';
 
   select: string[] = [];
+
+  populate?: string[] = [];
 }

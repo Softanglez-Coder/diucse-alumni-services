@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsUUID } from 'class-validator';
+import { IsEnum, IsNotEmpty } from 'class-validator';
 import { IPNStatus } from '../enums';
 
 export class IPNDto {

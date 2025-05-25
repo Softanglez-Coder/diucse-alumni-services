@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -69,6 +70,24 @@ export class PaymentService {
     return { url };
   }
 
+  async getById(id: string) {
+    if (!id) {
+      throw new BadRequestException('Payment ID is required');
+    }
+
+    const payment: PaymentDocument = await this.repository.findById(id);
+    if (!payment) {
+      throw new NotFoundException('Payment record not found');
+    }
+
+    return payment;
+  }
+
+  async findAll() {
+    const payments: PaymentDocument[] = await this.repository.findAll();
+    return payments;
+  }
+
   async handleIPN(payload: IPNDto) {
     const { status, tran_id: trxId, store_amount } = payload;
 
@@ -115,13 +134,6 @@ export class PaymentService {
       );
     }
 
-    // Return the updated payment record
-    return {
-      trxId: payment.trxId,
-      status: payment.status,
-      depositAmount: payment.depositAmount,
-      remarks: payment.remarks,
-      referenceId: payment.referenceId,
-    };
+    return updated;
   }
 }

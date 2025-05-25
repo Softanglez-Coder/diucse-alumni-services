@@ -30,11 +30,15 @@ export class BaseRepository<T extends Document> {
       .select(select || '')
       .skip(+(skip || 0))
       .limit(+limit || 10)
+      .populate(query.populate || [])
       .exec();
   }
 
-  async findById(id: string): Promise<T | null> {
-    return await this._model.findById(id).exec();
+  async findById(id: string, populate?: string[]): Promise<T | null> {
+    return await this._model
+      .findById(id)
+      .populate(populate || [])
+      .exec();
   }
 
   async create(dto: Partial<T>): Promise<T> {
