@@ -45,10 +45,6 @@ export class CreatePaymentDto {
   @IsNotEmpty()
   amount: number;
 
-  @IsString()
-  @IsNotEmpty()
-  host: string;
-
   @IsObject()
   @IsNotEmpty()
   product: CreatePaymentProduct;

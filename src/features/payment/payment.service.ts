@@ -10,7 +10,7 @@ import { SSLComz } from './providers';
 import { SSLComzInit } from './providers/sslcomz/sslcomz-init';
 import { PaymentRepository } from './payment.repository';
 import { Payment, PaymentDocument } from './payment.schema';
-import { PaymentRemarks, PaymentStatus } from './enums';
+import { IPNStatus, PaymentRemarks, PaymentStatus } from './enums';
 
 @Injectable()
 export class PaymentService {
@@ -27,7 +27,6 @@ export class PaymentService {
 
     const payload = new SSLComzInit(
       dto.amount,
-      dto.host,
       dto.product.name,
       dto.product.category,
       dto.customer.name,
@@ -89,7 +88,22 @@ export class PaymentService {
     }
 
     // Update the payment status and amount
-    payment.status = status;
+    const parseStatus = () => {
+      switch (status) {
+        case IPNStatus.VALID:
+          return PaymentStatus.COMPLETED;
+
+        case IPNStatus.FAILED:
+        case IPNStatus.CANCELLED:
+        case IPNStatus.EXPIRED:
+          return PaymentStatus.FAILED;
+
+        case IPNStatus.UNATTEMPTED:
+          return PaymentStatus.PENDING;
+      }
+    };
+
+    payment.status = parseStatus();
     payment.depositAmount = store_amount;
 
     const updated = await this.repository.update(payment.id, payment);

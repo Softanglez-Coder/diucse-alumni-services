@@ -7,10 +7,8 @@ export class IPNDto {
   status: IPNStatus;
 
   @IsNotEmpty()
-  @IsUUID()
   tran_id: string;
 
-  @IsNumber()
   @IsNotEmpty()
   store_amount: number;
 }

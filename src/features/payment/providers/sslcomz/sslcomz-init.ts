@@ -11,7 +11,7 @@ export class SSLComzInit {
   shipping_method: string = 'NO';
   product_name: string;
   product_category: string;
-  product_profile: string = 'general';
+  product_profile: string = 'non-physical-goods';
   cus_name: string;
   cus_email: string;
   cus_add1: string = 'Dhaka';
@@ -32,7 +32,6 @@ export class SSLComzInit {
 
   constructor(
     amount: number,
-    host: string,
     product: string,
     category: string,
     customer: string,
@@ -41,9 +40,9 @@ export class SSLComzInit {
   ) {
     this.total_amount = amount;
 
-    this.success_url = `${host}/payment/success`;
-    this.fail_url = `${host}/payment/fail`;
-    this.cancel_url = `${host}/payment/cancel`;
+    this.success_url = `${process.env.HOST}/payment/success`;
+    this.fail_url = `${process.env.HOST}/payment/fail`;
+    this.cancel_url = `${process.env.HOST}/payment/cancel`;
     this.ipn_url = `${process.env.HOST}/payment/ipn`;
 
     this.product_name = product;
