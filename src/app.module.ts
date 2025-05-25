@@ -1,23 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
-import { EventModule } from './event/event.module';
-import { GalleryModule } from './gallery/gallery.module';
-import { NoticeModule } from './notice/notice.module';
-import { CommitteeModule } from './committee/committee.module';
-import { NewsModule } from './news/news.module';
-import { MemberModule } from './member/member.module';
-import { MembershipModule } from './membership/membership.module';
-import { BlogModule } from './blog/blog.module';
-import { UserModule } from './user/user.module';
-import { PaymentModule } from './payment/payment.module';
-import { StorageModule } from './storage/storage.module';
-import { MediaModule } from './media/media.module';
-import { DatabaseModule } from './database/database.module';
-import { CountryModule } from './country/country.module';
-import { ShiftModule } from './shift/shift.module';
-import { BatchModule } from './batch/batch.module';
+import { DatabaseModule, StorageModule } from '@core';
+import { MediaModule } from '@media';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { PaymentModule } from '@payment';
 
 @Module({
   imports: [
@@ -25,25 +13,25 @@ import { BatchModule } from './batch/batch.module';
       envFilePath: ['.env'],
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60_000,
+          limit: 10,
+        },
+      ],
+    }),
     DatabaseModule,
-    AuthModule,
-    EventModule,
-    GalleryModule,
-    NoticeModule,
-    CommitteeModule,
-    NewsModule,
-    MemberModule,
-    MembershipModule,
-    BlogModule,
-    UserModule,
-    PaymentModule,
     StorageModule,
     MediaModule,
-    CountryModule,
-    ShiftModule,
-    BatchModule
+    PaymentModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
