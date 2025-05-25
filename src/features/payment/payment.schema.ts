@@ -1,13 +1,8 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
+import { PaymentRemarks, PaymentStatus } from "./enums";
 
 export type PaymentDocument = HydratedDocument<Payment>;
-
-export enum PaymentStatus {
-    PENDING = 'pending',
-    COMPLETED = 'completed',
-    FAILED = 'failed',
-}
 
 @Schema({
     timestamps: true,
@@ -32,6 +27,13 @@ export class Payment {
 
     @Prop({
         required: true,
+        type: Number,
+        min: 0,
+        default: 0,
+    })
+    depositAmount: number;
+
+    @Prop({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Member',
     })
@@ -39,9 +41,17 @@ export class Payment {
 
     @Prop({
         required: true,
-        type: String
+        type: String,
+        enum: Object.values(PaymentRemarks),
     })
     remarks: string;
+
+    @Prop({
+        type: String,
+        trim: true,
+        default: null,
+    })
+    referenceId?: string;
 
     @Prop({
         required: true,

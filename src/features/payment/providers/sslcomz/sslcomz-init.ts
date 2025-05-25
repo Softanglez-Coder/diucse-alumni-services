@@ -8,7 +8,7 @@ export class SSLComzInit {
   fail_url: string;
   cancel_url: string;
   ipn_url: string;
-  shipping_method: 'No';
+  shipping_method: string = 'NO';
   product_name: string;
   product_category: string;
   product_profile: string = 'general';
@@ -41,9 +41,9 @@ export class SSLComzInit {
 ) {
     this.total_amount = amount;
 
-    this.success_url = `${host}/success`;
-    this.fail_url = `${host}/fail`;
-    this.cancel_url = `${host}/cancel`;
+    this.success_url = `${host}/payment/success`;
+    this.fail_url = `${host}/payment/fail`;
+    this.cancel_url = `${host}/payment/cancel`;
     this.ipn_url = `${process.env.HOST}/payment/ipn`;
 
     this.product_name = product;
