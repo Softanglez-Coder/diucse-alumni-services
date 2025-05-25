@@ -1,12 +1,10 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { SSLComzInit } from './sslcomz-init';
+import * as SSLCommerzPayment from 'sslcommerz-lts';
 
-const SSLCommerzPayment = require('sslcommerz-lts');
 @Injectable()
 export class SSLComz {
-  constructor(
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly logger: Logger) {}
 
   async init(payload: SSLComzInit) {
     const store_id = process.env.SSL_COMMERZ_STORE_ID;
@@ -14,7 +12,7 @@ export class SSLComz {
     const is_live = process.env.SSL_COMMERZ_IS_LIVE === 'true';
 
     const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
-    
+
     try {
       const response = await sslcz.init(payload);
       const url = response.GatewayPageURL;
@@ -24,7 +22,7 @@ export class SSLComz {
 
       throw new HttpException(
         'SSL Commerce payment initiation failed',
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -43,9 +41,8 @@ export class SSLComz {
       this.logger.error('SSL Commerce IPN validation error:', error);
       throw new HttpException(
         'SSL Commerce IPN validation failed',
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-  
 }

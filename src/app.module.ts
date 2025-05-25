@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule, StorageModule } from '@core';
@@ -24,7 +24,7 @@ import { PaymentModule } from '@payment';
     DatabaseModule,
     StorageModule,
     MediaModule,
-    PaymentModule
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [

@@ -3,9 +3,7 @@ import { StorageService } from '@core';
 
 @Injectable()
 export class MediaService {
-  constructor(
-    private readonly storageService: StorageService,
-  ) {}
+  constructor(private readonly storageService: StorageService) {}
 
   async upload(file: Express.Multer.File) {
     const url = await this.storageService.upload(file);

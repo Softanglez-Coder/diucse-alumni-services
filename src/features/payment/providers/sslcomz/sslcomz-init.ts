@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 export class SSLComzInit {
   total_amount: number;
   currency: string = 'BDT';
-  tran_id: string  = uuid();
+  tran_id: string = uuid();
   success_url: string;
   fail_url: string;
   cancel_url: string;
@@ -37,8 +37,8 @@ export class SSLComzInit {
     category: string,
     customer: string,
     email: string,
-    phone: string
-) {
+    phone: string,
+  ) {
     this.total_amount = amount;
 
     this.success_url = `${host}/payment/success`;

@@ -3,15 +3,6 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
-  Get,
-  Query,
-  Param,
-  NotFoundException,
-  Body,
-  Patch,
-  Delete,
-  HttpException,
-  HttpStatus,
   BadRequestException,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
@@ -29,7 +20,13 @@ export class MediaController {
         fileSize: 0.5 * 1024 * 1024,
       },
       fileFilter: (_, file, callback) => {
-        const allowedTypes = [ 'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml' ];
+        const allowedTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'image/svg+xml',
+        ];
         if (!allowedTypes.includes(file.mimetype)) {
           return callback(new BadRequestException('Invalid file type'), false);
         }
