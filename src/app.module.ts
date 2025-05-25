@@ -5,6 +5,7 @@ import { DatabaseModule, StorageModule } from '@core';
 import { MediaModule } from '@media';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { PaymentModule } from '@payment';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { APP_GUARD } from '@nestjs/core';
     DatabaseModule,
     StorageModule,
     MediaModule,
+    PaymentModule
   ],
   controllers: [AppController],
   providers: [

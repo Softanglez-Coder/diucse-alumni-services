@@ -20,6 +20,7 @@
     "paths": {
       "@core": ["./src/core/index"],
       "@media": ["./src/features/media/index"],
+      "@payment": ["./src/features/payment/index"],
     }
   }
 }

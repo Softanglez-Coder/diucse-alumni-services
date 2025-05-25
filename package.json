@@ -42,7 +42,9 @@
     "passport": "^0.7.0",
     "passport-auth0": "^1.4.4",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "sslcommerz-lts": "^1.1.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
