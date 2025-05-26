@@ -4,9 +4,10 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
 } from '@nestjs/common';
-import { MembershipRequestDto } from './dto';
+import { MembershipRequestDto, MembershipRequestUpdateDto } from './dto';
 import { MembershipService } from './membership.service';
 
 @Controller('memberships')
@@ -18,13 +19,8 @@ export class MembershipController {
     return await this.membershipService.request(dto);
   }
 
-  @Get(':id')
-  async findById(@Param('id') id: string) {
-    return await this.membershipService.findById(id);
-  }
-
   @Get('pendings')
-  async findAll() {
+  async findPendings() {
     return await this.membershipService.findPendings();
   }
 
@@ -48,22 +44,36 @@ export class MembershipController {
     return await this.membershipService.findRejected();
   }
 
-  @Post(':id/in-progress')
+  @Get(':id')
+  async findById(@Param('id') id: string) {
+    console.log(`Finding membership by ID: ${id}`);
+    return await this.membershipService.findById(id);
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() dto: MembershipRequestUpdateDto,
+  ) {
+    return await this.membershipService.update(id, dto);
+  }
+
+  @Patch(':id/in-progress')
   async inProgress(@Param('id') id: string) {
     return await this.membershipService.inProgress(id);
   }
 
-  @Post(':id/validate')
+  @Patch(':id/validate')
   async validate(@Param('id') id: string) {
     return await this.membershipService.validate(id);
   }
 
-  @Post(':id/approve')
+  @Patch(':id/approve')
   async approve(@Param('id') id: string) {
     return await this.membershipService.approve(id);
   }
 
-  @Post(':id/reject')
+  @Patch(':id/reject')
   async reject(
     @Param('id') id: string,
     @Body('justification') justification: string,

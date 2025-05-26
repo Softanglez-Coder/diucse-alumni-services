@@ -33,6 +33,7 @@ export class Membership {
     type: mongoose.Schema.Types.ObjectId,
     ref: Batch.name,
     required: true,
+    autopopulate: true,
   })
   batch: BatchDocument;
 
@@ -40,6 +41,7 @@ export class Membership {
     type: mongoose.Schema.Types.ObjectId,
     ref: Shift.name,
     required: true,
+    autopopulate: true,
   })
   shift: ShiftDocument;
 
@@ -64,9 +66,11 @@ export class Membership {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: Payment.name,
+    autopopulate: true,
   })
   payment: PaymentDocument;
 }
 
 export const MembershipSchema = SchemaFactory.createForClass(Membership);
+MembershipSchema.plugin(require('mongoose-autopopulate'));
 export type MembershipDocument = HydratedDocument<Membership>;

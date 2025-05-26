@@ -6,6 +6,7 @@ import { MembershipRepository } from './membership.repository';
 import { MembershipService } from './membership.service';
 import { PaymentModule } from '@payment';
 import { BatchModule } from '@batch';
+import { ShiftModule } from '@shift';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { BatchModule } from '@batch';
       },
     ]),
     PaymentModule,
-    BatchModule
+    BatchModule,
+    ShiftModule,
   ],
   controllers: [MembershipController],
   providers: [MembershipRepository, MembershipService],

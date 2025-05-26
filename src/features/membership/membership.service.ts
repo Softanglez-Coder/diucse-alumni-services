@@ -7,14 +7,15 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PaymentService } from '@payment';
-import { PaymentRemarks } from '../payment/enums';
-import { MembershipRequestDto } from './dto';
+import { PaymentRemarks, PaymentStatus } from '../payment/enums';
+import { MembershipRequestDto, MembershipRequestUpdateDto } from './dto';
 import { MembershipRequestStatus } from './enums/membership-request-status';
 import { MEMBERSHIP_FEE } from './const/membership.config';
 import { MembershipRepository } from './membership.repository';
-import { isEmail, isMongoId, isUUID } from 'class-validator';
+import { isEmail, isMongoId } from 'class-validator';
 import { MembershipDocument } from './membership.schema';
 import { BatchService } from '@batch';
+import { ShiftService } from '@shift';
 
 @Injectable()
 export class MembershipService {
@@ -22,6 +23,7 @@ export class MembershipService {
     private readonly membershipRepository: MembershipRepository,
     private readonly paymentService: PaymentService,
     private readonly batchService: BatchService,
+    private readonly shiftService: ShiftService,
   ) {}
 
   async request(dto: MembershipRequestDto) {
@@ -34,7 +36,6 @@ export class MembershipService {
         `Membership request with email ${dto.email} already exists.`,
       );
     }
-
 
     const existingPhone = await this.membershipRepository.findByPhone(
       dto.phone,
@@ -50,15 +51,102 @@ export class MembershipService {
       throw new NotFoundException(`Batch with id ${dto.batch} not found`);
     }
 
+    const shift = await this.shiftService.findById(dto.shift);
+    if (!shift) {
+      throw new NotFoundException(`Shift with id ${dto.shift} not found`);
+    }
+
     return await this.membershipRepository.create(dto);
   }
 
   async findById(id: string) {
-    return await this.membershipRepository.findById(id);
+    try {
+      return await this.membershipRepository.findById(id);
+    } catch (error) {
+      throw new HttpException(
+        `Failed to fetch membership with id ${id}: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async update(id: string, dto: MembershipRequestDto) {
+    const membership = await this.membershipRepository.findById(id);
+
+    if (!membership) {
+      throw new NotFoundException(`Membership with id ${id} not found`);
+    }
+
+    if (membership.status !== MembershipRequestStatus.PENDING) {
+      throw new BadRequestException(
+        `Membership with id ${id} is not in status 'PENDING'. Only pending memberships can be updated.`,
+      );
+    }
+
+    const existingEmail = await this.membershipRepository.findByEmail(
+      dto.email,
+    );
+    if (existingEmail && existingEmail.id !== id) {
+      throw new ConflictException(
+        `Membership request with email ${dto.email} already exists.`,
+      );
+    }
+
+    const existingPhone = await this.membershipRepository.findByPhone(
+      dto.phone,
+    );
+    if (existingPhone && existingPhone.id !== id) {
+      throw new ConflictException(
+        `Membership request with phone ${dto.phone} already exists.`,
+      );
+    }
+
+    const batch = await this.batchService.findById(
+      dto.batch ?? membership.batch?.id,
+    );
+    if (!batch) {
+      throw new NotFoundException(`Batch with id ${dto.batch} not found`);
+    }
+
+    const shift = await this.shiftService.findById(
+      dto.shift ?? membership.shift?.id,
+    );
+    if (!shift) {
+      throw new NotFoundException(`Shift with id ${dto.shift} not found`);
+    }
+
+    const updated: Partial<MembershipRequestUpdateDto> = {
+      name: dto.name ?? membership.name,
+      email: dto.email ?? membership.email,
+      phone: dto.phone ?? membership.phone,
+      batch: batch.id,
+      shift: shift.id,
+      photo: dto.photo ?? membership.photo,
+    };
+
+    const updatedMembership = await this.membershipRepository.update(
+      id,
+      updated,
+    );
+    if (!updatedMembership) {
+      throw new HttpException(
+        `Failed to update membership with id ${id}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return updatedMembership;
   }
 
   async findPendings() {
-    return await this.membershipRepository.findPendings();
+    try {
+      return await this.membershipRepository.findPendings();
+    } catch (error) {
+      throw new HttpException(
+        `Failed to fetch pending memberships: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async findInProgress() {
@@ -148,6 +236,12 @@ export class MembershipService {
       );
     }
 
+    if (membership.payment?.status !== PaymentStatus.COMPLETED) {
+      throw new BadRequestException(
+        'Payment is not completed. Please pay the membership fee first.',
+      );
+    }
+
     return await this.membershipRepository.validate(id);
   }
 
@@ -215,6 +309,12 @@ export class MembershipService {
       );
     }
 
+    if (membership.status === MembershipRequestStatus.APPROVED) {
+      throw new BadRequestException(
+        `Membership with id ${id} is already approved. No further actions are required.`,
+      );
+    }
+
     if (membership.status !== MembershipRequestStatus.VALIDATED) {
       throw new BadRequestException(
         `Membership with id ${id} is not in status 'VALIDATED'. Please validate it first.`,
@@ -243,9 +343,9 @@ export class MembershipService {
       throw new NotFoundException(`Membership with id ${id} not found`);
     }
 
-    if (membership.status !== MembershipRequestStatus.VALIDATED) {
-      throw new BadRequestException(
-        `Membership with id ${id} is not in status 'VALIDATED'. Please validate it first.`,
+    if (membership.payment?.status === PaymentStatus.COMPLETED) {
+      throw new ConflictException(
+        `Payment for membership with id ${id} is already completed.`,
       );
     }
 

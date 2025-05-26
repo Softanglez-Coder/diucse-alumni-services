@@ -15,12 +15,7 @@ import { BatchService } from './batch.service';
     ]),
   ],
   controllers: [BatchController],
-  providers: [
-    BatchRepository,
-    BatchService
-  ],
-  exports: [
-    BatchService
-  ]
+  providers: [BatchRepository, BatchService],
+  exports: [BatchService],
 })
 export class BatchModule {}
