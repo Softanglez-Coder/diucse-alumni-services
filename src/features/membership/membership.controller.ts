@@ -14,6 +14,12 @@ import { MembershipService } from './membership.service';
 export class MembershipController {
   constructor(private readonly membershipService: MembershipService) {}
 
+  @Post('create-user')
+  async createUser(@Body() body: { membershipId: string }) {
+    const { membershipId } = body;
+    return await this.membershipService.createUser(membershipId);
+  }
+
   @Post('request')
   async request(@Body() dto: MembershipRequestDto) {
     return await this.membershipService.request(dto);

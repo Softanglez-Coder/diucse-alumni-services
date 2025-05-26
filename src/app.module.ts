@@ -12,6 +12,8 @@ import { MembershipModule } from '@membership';
 import { BatchModule } from '@batch';
 import { ShiftModule } from '@shift';
 import { MediaModule } from '@media';
+import { UserModule } from '@user';
+import { MemberModule } from '@member';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { MediaModule } from '@media';
     MembershipModule,
     BatchModule,
     ShiftModule,
+    UserModule,
+    MemberModule,
   ],
   controllers: [AppController],
   providers: [

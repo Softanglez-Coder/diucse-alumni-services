@@ -16,6 +16,8 @@ import { isEmail, isMongoId } from 'class-validator';
 import { MembershipDocument } from './membership.schema';
 import { BatchService } from '@batch';
 import { ShiftService } from '@shift';
+import { UserService } from '@user';
+import { MemberService } from '@member';
 
 @Injectable()
 export class MembershipService {
@@ -24,6 +26,8 @@ export class MembershipService {
     private readonly paymentService: PaymentService,
     private readonly batchService: BatchService,
     private readonly shiftService: ShiftService,
+    private readonly userService: UserService,
+    private readonly memberService: MemberService,
   ) {}
 
   async request(dto: MembershipRequestDto) {
@@ -293,6 +297,36 @@ export class MembershipService {
       );
     }
 
+    // Create user after approval
+    const user = await this.userService.create(
+      updatedMembership.email,
+      updatedMembership.phone,
+    );
+    if (!user) {
+      throw new HttpException(
+        `Failed to create user for membership with id ${id}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    // Create a new member and link it to the user
+    const member = await this.memberService.create({
+      username: user.username,
+      name: updatedMembership.name,
+      phone: updatedMembership.phone,
+      email: updatedMembership.email,
+      batch: updatedMembership.batch.id,
+      shift: updatedMembership.shift.id,
+      photo: updatedMembership.photo,
+    });
+
+    if (!member) {
+      throw new HttpException(
+        `Failed to create member for membership with id ${id}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
     return updatedMembership;
   }
 
@@ -373,5 +407,53 @@ export class MembershipService {
     }
 
     return payment;
+  }
+
+  async createUser(membershipId: string) {
+    const membership = await this.membershipRepository.findById(membershipId);
+
+    if (!membership) {
+      throw new NotFoundException(
+        `Membership with id ${membershipId} not found`,
+      );
+    }
+
+    if (membership.status !== MembershipRequestStatus.APPROVED) {
+      throw new BadRequestException(
+        `Membership with id ${membershipId} is not approved. Only approved memberships can create users.`,
+      );
+    }
+
+    const user = await this.userService.create(
+      membership.email,
+      membership.phone,
+    );
+
+    if (!user) {
+      throw new HttpException(
+        `Failed to create user for membership with id ${membershipId}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    // Create a new member and link it to the user
+    const member = await this.memberService.create({
+      username: user.username,
+      name: membership.name,
+      phone: membership.phone,
+      email: membership.email,
+      batch: membership.batch.id,
+      shift: membership.shift.id,
+      photo: membership.photo,
+    });
+
+    if (!member) {
+      throw new HttpException(
+        `Failed to create member for membership with id ${membershipId}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return member;
   }
 }
