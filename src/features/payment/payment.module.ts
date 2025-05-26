@@ -15,6 +15,7 @@ import { SSLComz } from './providers';
       },
     ]),
   ],
+  exports: [PaymentService],
   controllers: [PaymentController],
   providers: [PaymentService, PaymentRepository, SSLComz, Logger],
 })

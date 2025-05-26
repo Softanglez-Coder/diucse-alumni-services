@@ -67,7 +67,10 @@ export class PaymentService {
       );
     }
 
-    return { url };
+    return {
+      id: created.id,
+      url,
+    };
   }
 
   async getById(id: string) {

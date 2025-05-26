@@ -21,6 +21,9 @@
       "@core": ["./src/core/index"],
       "@media": ["./src/features/media/index"],
       "@payment": ["./src/features/payment/index"],
+      "@batch": ["./src/features/batch/index"],
+      "@shift": ["./src/features/shift/index"],
+      "@membership": ["./src/features/membership/index"],
     }
   }
 }

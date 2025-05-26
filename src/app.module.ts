@@ -1,11 +1,17 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
-import { DatabaseModule, StorageModule } from '@core';
-import { MediaModule } from '@media';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+
+import { AppController } from './app.controller';
+
+import { DatabaseModule, StorageModule } from '@core';
+
 import { PaymentModule } from '@payment';
+import { MembershipModule } from '@membership';
+import { BatchModule } from '@batch';
+import { ShiftModule } from '@shift';
+import { MediaModule } from '@media';
 
 @Module({
   imports: [
@@ -25,6 +31,9 @@ import { PaymentModule } from '@payment';
     StorageModule,
     MediaModule,
     PaymentModule,
+    MembershipModule,
+    BatchModule,
+    ShiftModule,
   ],
   controllers: [AppController],
   providers: [
