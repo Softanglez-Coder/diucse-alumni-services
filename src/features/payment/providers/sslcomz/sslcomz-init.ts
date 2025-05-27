@@ -31,6 +31,7 @@ export class SSLComzInit {
   ship_country: string = 'Bangladesh';
 
   constructor(
+    host: string,
     amount: number,
     product: string,
     category: string,
@@ -40,10 +41,10 @@ export class SSLComzInit {
   ) {
     this.total_amount = amount;
 
-    this.success_url = `${process.env.HOST}/payment/success`;
-    this.fail_url = `${process.env.HOST}/payment/fail`;
-    this.cancel_url = `${process.env.HOST}/payment/cancel`;
-    this.ipn_url = `${process.env.HOST}/payment/ipn`;
+    this.success_url = `${host}/payment/success`;
+    this.fail_url = `${host}/payment/fail`;
+    this.cancel_url = `${host}/payment/cancel`;
+    this.ipn_url = `${host}/payment/ipn`;
 
     this.product_name = product;
     this.product_category = category;

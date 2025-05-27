@@ -37,6 +37,6 @@ export class MediaController {
   )
   async upload(@UploadedFile() file: Express.Multer.File) {
     const url = await this.mediaService.upload(file);
-    return url;
+    return { url };
   }
 }

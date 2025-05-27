@@ -14,7 +14,10 @@ export class StorageService {
     const stream = Readable.from(file.buffer);
     return new Promise<string>((resolve, reject) => {
       const uploadStream = this.client.uploader.upload_stream(
-        { resource_type: 'auto' }, // auto supports PDF, image, etc.
+        {
+          resource_type: 'auto',
+          folder: process.env.CLOUDINARY_FOLDER,
+        },
         (error, result: UploadApiResponse) => {
           if (error) {
             return reject(error);

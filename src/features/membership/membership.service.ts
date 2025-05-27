@@ -514,7 +514,7 @@ export class MembershipService {
     return rejected;
   }
 
-  async pay(id: string) {
+  async pay(host: string, id: string) {
     const mongoId = isMongoId(id);
     const email = isEmail(id);
     const phone = !mongoId && !email;
@@ -539,7 +539,7 @@ export class MembershipService {
       );
     }
 
-    const payment = await this.paymentService.create({
+    const payment = await this.paymentService.create(host, {
       amount: MEMBERSHIP_FEE,
       product: {
         id: null,

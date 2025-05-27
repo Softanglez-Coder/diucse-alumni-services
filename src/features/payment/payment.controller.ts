@@ -1,15 +1,21 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import { CreatePaymentDto, IPNDto } from './dtos';
 import { PaymentService } from './payment.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Controller('payment')
 export class PaymentController {
   constructor(private readonly service: PaymentService) {}
 
   @Post()
-  async create(@Body() dto: CreatePaymentDto) {
-    return await this.service.create(dto);
+  async create(@Body() dto: CreatePaymentDto, @Req() req: Request) {
+    const host = `${req.protocol}://${req.get('host')}`;
+
+    if (req.get('port')) {
+      host.concat(`:${req.get('port')}`);
+    }
+
+    return await this.service.create(host, dto);
   }
 
   @Get()

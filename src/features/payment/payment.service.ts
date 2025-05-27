@@ -24,12 +24,13 @@ export class PaymentService {
     private readonly mailerService: MailerService,
   ) {}
 
-  async create(dto: CreatePaymentDto) {
+  async create(host: string, dto: CreatePaymentDto) {
     if (dto.product.category === PaymentRemarks.MEMBERSHIP_FEE) {
       dto.product.name = 'Membership Fee';
     }
 
     const payload = new SSLComzInit(
+      host,
       dto.amount,
       dto.product.name,
       dto.product.category,

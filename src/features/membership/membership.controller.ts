@@ -6,9 +6,11 @@ import {
   Param,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import { MembershipRequestDto, MembershipRequestUpdateDto } from './dto';
 import { MembershipService } from './membership.service';
+import { Request } from 'express';
 
 @Controller('memberships')
 export class MembershipController {
@@ -92,7 +94,12 @@ export class MembershipController {
   }
 
   @Post(':id/pay')
-  async pay(@Param('id') id: string) {
-    return await this.membershipService.pay(id);
+  async pay(@Param('id') id: string, @Req() req: Request) {
+    const host = `${req.protocol}://${req.get('host')}`;
+    if (req.get('port')) {
+      host.concat(`:${req.get('port')}`);
+    }
+
+    return await this.membershipService.pay(host, id);
   }
 }

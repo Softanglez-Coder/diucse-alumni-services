@@ -19,7 +19,7 @@ import { AuthModule } from './features/auth';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env'],
+      envFilePath: ['.env.local', '.env'],
       isGlobal: true,
     }),
     ThrottlerModule.forRoot({
