@@ -9,10 +9,6 @@ import {
 export class CreateMemberDto {
   @IsString()
   @IsNotEmpty()
-  username: string;
-
-  @IsString()
-  @IsNotEmpty()
   name: string;
 
   @IsString()

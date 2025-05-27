@@ -10,14 +10,6 @@ export class Member {
   @Prop({
     type: String,
     required: true,
-    unique: true,
-    trim: true,
-  })
-  username: string;
-
-  @Prop({
-    type: String,
-    required: true,
   })
   name: string;
 

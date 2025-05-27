@@ -5,6 +5,7 @@ import { PaymentService } from './payment.service';
 import { PaymentRepository } from './payment.repository';
 import { PaymentController } from './payment.controller';
 import { SSLComz } from './providers';
+import { MailerModule } from '@core';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { SSLComz } from './providers';
         schema: PaymentSchema,
       },
     ]),
+    MailerModule,
   ],
   exports: [PaymentService],
   controllers: [PaymentController],

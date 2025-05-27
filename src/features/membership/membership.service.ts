@@ -18,6 +18,7 @@ import { BatchService } from '@batch';
 import { ShiftService } from '@shift';
 import { UserService } from '@user';
 import { MemberService } from '@member';
+import { MailerService } from '@core';
 
 @Injectable()
 export class MembershipService {
@@ -28,6 +29,7 @@ export class MembershipService {
     private readonly shiftService: ShiftService,
     private readonly userService: UserService,
     private readonly memberService: MemberService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async request(dto: MembershipRequestDto) {
@@ -58,6 +60,28 @@ export class MembershipService {
     const shift = await this.shiftService.findById(dto.shift);
     if (!shift) {
       throw new NotFoundException(`Shift with id ${dto.shift} not found`);
+    }
+
+    try {
+      const body = `
+      <h1>Membership Request</h1>
+      <p>Dear ${dto.name},</p>
+      <p>Thank you for your interest in becoming a member. Your membership request has been received and is currently under review.</p>
+      <p>We will notify you via email once your request has been processed.</p>
+      <p>Best regards,</p>
+      <p>The Membership Team</p>
+      `;
+
+      await this.mailerService.sendMail(
+        dto.email,
+        'Membership Request Received',
+        body,
+      );
+    } catch (error) {
+      throw new HttpException(
+        `Failed to send membership request email: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     return await this.membershipRepository.create(dto);
@@ -139,6 +163,27 @@ export class MembershipService {
       );
     }
 
+    try {
+      const body = `
+      <h1>Membership Request Updated</h1>
+      <p>Dear ${updatedMembership.name},</p>
+      <p>Your membership request has been updated successfully. We will notify you via email once your request has been processed.</p>
+      <p>Best regards,</p>
+      <p>The Membership Team</p>
+      `;
+
+      await this.mailerService.sendMail(
+        updatedMembership.email,
+        'Membership Request Updated',
+        body,
+      );
+    } catch (error) {
+      throw new HttpException(
+        `Failed to send membership update email: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
     return updatedMembership;
   }
 
@@ -206,6 +251,27 @@ export class MembershipService {
       );
     }
 
+    try {
+      const body = `
+      <h1>Membership Request In Progress</h1>
+      <p>Dear ${membership.name},</p>
+      <p>Your membership request is now in progress. We will notify you via email once your request has been processed.</p>
+      <p>Best regards,</p>
+      <p>The Membership Team</p>
+      `;
+
+      await this.mailerService.sendMail(
+        membership.email,
+        'Membership Request In Progress',
+        body,
+      );
+    } catch (error) {
+      throw new HttpException(
+        `Failed to send membership in progress email: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
     return await this.membershipRepository.inProgress(id);
   }
 
@@ -243,6 +309,27 @@ export class MembershipService {
     if (membership.payment?.status !== PaymentStatus.COMPLETED) {
       throw new BadRequestException(
         'Payment is not completed. Please pay the membership fee first.',
+      );
+    }
+
+    try {
+      const body = `
+      <h1>Membership Request Validated</h1>
+      <p>Dear ${membership.name},</p>
+      <p>Your membership request has been validated successfully. You can now proceed to approve or reject it.</p>
+      <p>Best regards,</p>
+      <p>The Membership Team</p>
+      `;
+
+      await this.mailerService.sendMail(
+        membership.email,
+        'Membership Request Validated',
+        body,
+      );
+    } catch (error) {
+      throw new HttpException(
+        `Failed to send membership validation email: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
@@ -311,7 +398,6 @@ export class MembershipService {
 
     // Create a new member and link it to the user
     const member = await this.memberService.create({
-      username: user.username,
       name: updatedMembership.name,
       phone: updatedMembership.phone,
       email: updatedMembership.email,
@@ -323,6 +409,38 @@ export class MembershipService {
     if (!member) {
       throw new HttpException(
         `Failed to create member for membership with id ${id}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    try {
+      const body = `
+      <h1>Membership Request Approved</h1>
+      <p>Dear ${updatedMembership.name},</p>
+      <p>Your membership request has been approved successfully. Welcome aboard!</p>
+      <p>You can now access all member benefits and resources.</p>
+      <p>If you have any questions or need assistance, feel free to reach out to us.</p>
+
+      <br><br>
+      <p>
+      Please login to your account by your email and password (temporarily set as your phone number).
+      Plase change your password after first login.
+      </p>
+
+      <br><br>
+      <p>Thank you for being a part of our community!</p>
+      <p>Best regards,</p>
+      <p>The Membership Team</p>
+      `;
+
+      await this.mailerService.sendMail(
+        updatedMembership.email,
+        'Membership Request Approved',
+        body,
+      );
+    } catch (error) {
+      throw new HttpException(
+        `Failed to send membership approval email: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -355,7 +473,45 @@ export class MembershipService {
       );
     }
 
-    return await this.membershipRepository.reject(id, justification);
+    if (!justification || justification.trim() === '') {
+      throw new BadRequestException(
+        'Justification is required for rejecting a membership request.',
+      );
+    }
+
+    const rejected = await this.membershipRepository.reject(id, justification);
+
+    if (!rejected) {
+      throw new HttpException(
+        `Failed to reject membership with id ${id}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    try {
+      const body = `
+      <h1>Membership Request Rejected</h1>
+      <p>Dear ${membership.name},</p>
+      <p>We regret to inform you that your membership request has been rejected.</p>
+      <p>Justification: ${justification}</p>
+      <p>If you have any questions or need further clarification, please feel free to reach out to us.</p>
+      <p>Best regards,</p>
+      <p>The Membership Team</p>
+      `;
+
+      await this.mailerService.sendMail(
+        membership.email,
+        'Membership Request Rejected',
+        body,
+      );
+    } catch (error) {
+      throw new HttpException(
+        `Failed to send membership rejection email: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return rejected;
   }
 
   async pay(id: string) {
@@ -438,7 +594,6 @@ export class MembershipService {
 
     // Create a new member and link it to the user
     const member = await this.memberService.create({
-      username: user.username,
       name: membership.name,
       phone: membership.phone,
       email: membership.email,
@@ -450,6 +605,28 @@ export class MembershipService {
     if (!member) {
       throw new HttpException(
         `Failed to create member for membership with id ${membershipId}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    try {
+      const body = `
+      <h1>User Account Created</h1>
+      <p>Dear ${membership.name},</p>
+      <p>Your user account has been created successfully. You can now log in using your email and phone number as the temporary password.</p>
+      <p>Please change your password after your first login.</p>
+      <p>Best regards,</p>
+      <p>The Membership Team</p>
+      `;
+
+      await this.mailerService.sendMail(
+        membership.email,
+        'User Account Created',
+        body,
+      );
+    } catch (error) {
+      throw new HttpException(
+        `Failed to send user account creation email: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

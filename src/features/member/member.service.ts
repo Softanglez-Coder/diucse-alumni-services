@@ -9,4 +9,8 @@ export class MemberService {
   async create(dto: CreateMemberDto) {
     return await this.memberRepository.create(dto);
   }
+
+  async findByEmail(email: string) {
+    return await this.memberRepository.findByEmail(email);
+  }
 }

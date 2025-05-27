@@ -1,8 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { PaymentRemarks, PaymentStatus } from './enums';
-
-export type PaymentDocument = HydratedDocument<Payment>;
 
 @Schema({
   timestamps: true,
@@ -34,10 +32,9 @@ export class Payment {
   depositAmount: number;
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Member',
+    type: String,
   })
-  member: string;
+  email: string;
 
   @Prop({
     required: true,
@@ -63,3 +60,5 @@ export class Payment {
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);
+PaymentSchema.plugin(require('mongoose-autopopulate'));
+export type PaymentDocument = HydratedDocument<Payment>;

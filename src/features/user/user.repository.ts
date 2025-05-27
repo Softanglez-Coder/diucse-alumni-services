@@ -9,13 +9,13 @@ export class UserRepository {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
-  async create(username: string, hash: string) {
-    const user = new this.userModel({ username, hash });
+  async create(email: string, hash: string) {
+    const user = new this.userModel({ email, hash });
     return await user.save();
   }
 
-  async findByUsername(username: string): Promise<UserDocument | null> {
-    return await this.userModel.findOne({ username }).exec();
+  async findByUsername(email: string): Promise<UserDocument | null> {
+    return await this.userModel.findOne({ email }).exec();
   }
 
   async findById(id: string): Promise<UserDocument | null> {
@@ -36,8 +36,8 @@ export class UserRepository {
     return await this.userModel.find().exec();
   }
 
-  async exists(username: string): Promise<boolean> {
-    const user = await this.userModel.findOne({ username }).exec();
+  async exists(email: string): Promise<boolean> {
+    const user = await this.userModel.findOne({ email }).exec();
     return !!user;
   }
 }

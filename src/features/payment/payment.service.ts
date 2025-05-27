@@ -12,6 +12,7 @@ import { SSLComzInit } from './providers/sslcomz/sslcomz-init';
 import { PaymentRepository } from './payment.repository';
 import { Payment, PaymentDocument } from './payment.schema';
 import { IPNStatus, PaymentRemarks, PaymentStatus } from './enums';
+import { MailerService } from '@core';
 
 @Injectable()
 export class PaymentService {
@@ -19,6 +20,8 @@ export class PaymentService {
     private readonly provider: SSLComz,
     private readonly repository: PaymentRepository,
     private readonly logger: Logger,
+
+    private readonly mailerService: MailerService,
   ) {}
 
   async create(dto: CreatePaymentDto) {
@@ -53,7 +56,7 @@ export class PaymentService {
       remarks: dto.product.category,
       amount: dto.amount,
       depositAmount: 0,
-      member: dto.customer?.id,
+      email: dto.customer.email,
       referenceId: dto.product?.id,
       status: PaymentStatus.PENDING,
     };
@@ -135,6 +138,27 @@ export class PaymentService {
         'Failed to update payment record',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+
+    if (payment.status === PaymentStatus.COMPLETED) {
+      const body = `
+      <p>Hello,</p>
+      <p>Your payment of ${payment.amount} BDT for ${payment.remarks} has been successfully completed.</p>
+      <p>Transaction ID: ${payment.trxId}</p>
+      <p>Thank you for your payment!</p>
+      `;
+
+      try {
+        await this.mailerService.sendMail(
+          payment.email,
+          'Payment Confirmation',
+          body,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to send payment confirmation email: ${error.message}`,
+        );
+      }
     }
 
     return updated;

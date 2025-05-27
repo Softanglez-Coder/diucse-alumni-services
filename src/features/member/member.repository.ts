@@ -15,4 +15,8 @@ export class MemberRepository {
     const member = new this.memberModel(dto);
     return await member.save();
   }
+
+  async findByEmail(email: string): Promise<MemberDocument | null> {
+    return await this.memberModel.findOne({ email }).exec();
+  }
 }

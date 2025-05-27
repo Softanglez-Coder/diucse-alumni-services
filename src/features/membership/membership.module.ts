@@ -9,6 +9,7 @@ import { BatchModule } from '@batch';
 import { ShiftModule } from '@shift';
 import { UserModule } from '@user';
 import { MemberModule } from '../member/member.module';
+import { MailerModule } from '@core';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MemberModule } from '../member/member.module';
     ShiftModule,
     UserModule,
     MemberModule,
+    MailerModule,
   ],
   controllers: [MembershipController],
   providers: [MembershipRepository, MembershipService],

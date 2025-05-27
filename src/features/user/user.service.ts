@@ -6,13 +6,13 @@ import * as bcrypt from 'bcrypt';
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async create(username: string, password: string) {
+  async create(email: string, password: string) {
     const hashedPassword = await this.hashPassword(password);
-    return await this.userRepository.create(username, hashedPassword);
+    return await this.userRepository.create(email, hashedPassword);
   }
 
-  async findByUsername(username: string) {
-    return await this.userRepository.findByUsername(username);
+  async findByEmail(email: string) {
+    return await this.userRepository.findByUsername(email);
   }
 
   async findById(id: string) {
@@ -32,12 +32,12 @@ export class UserService {
     return await this.userRepository.findAll();
   }
 
-  async exists(username: string): Promise<boolean> {
-    return await this.userRepository.exists(username);
+  async exists(email: string): Promise<boolean> {
+    return await this.userRepository.exists(email);
   }
 
-  async validateUser(username: string, password: string): Promise<boolean> {
-    const user = await this.userRepository.findByUsername(username);
+  async validateUser(email: string, password: string): Promise<boolean> {
+    const user = await this.userRepository.findByUsername(email);
 
     if (!user) {
       return false;

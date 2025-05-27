@@ -14,6 +14,7 @@ import { ShiftModule } from '@shift';
 import { MediaModule } from '@media';
 import { UserModule } from '@user';
 import { MemberModule } from '@member';
+import { AuthModule } from './features/auth';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { MemberModule } from '@member';
     ShiftModule,
     UserModule,
     MemberModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
