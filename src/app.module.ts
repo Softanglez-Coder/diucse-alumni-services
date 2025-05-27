@@ -1,11 +1,17 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 import { AppController } from './app.controller';
 
-import { DatabaseModule, StorageModule } from '@core';
+import {
+  AuthGuard,
+  DatabaseModule,
+  LoggingInterceptor,
+  RolesGuard,
+  StorageModule,
+} from '@core';
 
 import { PaymentModule } from '@payment';
 import { MembershipModule } from '@membership';
@@ -15,6 +21,7 @@ import { MediaModule } from '@media';
 import { UserModule } from '@user';
 import { MemberModule } from '@member';
 import { AuthModule } from './features/auth';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -40,12 +47,26 @@ import { AuthModule } from './features/auth';
     UserModule,
     MemberModule,
     AuthModule,
+    JwtModule,
   ],
   controllers: [AppController],
   providers: [
+    Logger,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

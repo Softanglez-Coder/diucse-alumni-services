@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Member, MemberSchema } from './member.schema';
 import { MemberService } from './member.service';
 import { MemberRepository } from './member.repository';
+import { MemberController } from './member.controller';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { MemberRepository } from './member.repository';
       },
     ]),
   ],
-  controllers: [],
+  controllers: [MemberController],
   providers: [MemberService, MemberRepository],
   exports: [MemberService],
 })

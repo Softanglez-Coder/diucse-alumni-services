@@ -1,7 +1,9 @@
+import { Public } from '@core';
 import { Controller, Get } from '@nestjs/common';
 
 @Controller()
 export class AppController {
+  @Public()
   @Get()
   sayHello(): string {
     return `
@@ -12,6 +14,7 @@ export class AppController {
       `;
   }
 
+  @Public()
   @Get('health')
   checkHealth(): string {
     return `Hey! I am alive.`;

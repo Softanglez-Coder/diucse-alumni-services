@@ -2,11 +2,13 @@ import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import { CreatePaymentDto, IPNDto } from './dtos';
 import { PaymentService } from './payment.service';
 import { Request, Response } from 'express';
+import { Public, Role, Roles } from '@core';
 
 @Controller('payment')
 export class PaymentController {
   constructor(private readonly service: PaymentService) {}
 
+  @Public()
   @Post()
   async create(@Body() dto: CreatePaymentDto, @Req() req: Request) {
     const host = `${req.protocol}://${req.get('host')}`;
@@ -18,16 +20,19 @@ export class PaymentController {
     return await this.service.create(host, dto);
   }
 
+  @Roles(Role.ADMIN, Role.ACCOUNTANT)
   @Get()
   async findAll() {
     return await this.service.findAll();
   }
 
+  @Public()
   @Get(':id')
   async getById(@Param('id') id: string) {
     return await this.service.getById(id);
   }
 
+  @Public()
   @Post('success')
   async success(@Body() body: IPNDto, @Res() res: Response) {
     const handled = await this.service.handleIPN(body);
@@ -42,6 +47,7 @@ export class PaymentController {
     return res.redirect(url);
   }
 
+  @Public()
   @Post('fail')
   async fail(@Body() body, @Res() res: Response) {
     const handled = await this.service.handleIPN(body);
@@ -56,6 +62,7 @@ export class PaymentController {
     return res.redirect(url);
   }
 
+  @Public()
   @Post('cancel')
   async cancel(@Body() body, @Res() res: Response) {
     const handled = await this.service.handleIPN(body);
