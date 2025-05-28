@@ -57,6 +57,46 @@ export class Payment {
     default: PaymentStatus.PENDING,
   })
   status: string;
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  cardNo: string;
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  cardIssuer: string;
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  cardBrand: string;
+
+  @Prop({
+    type: String,
+    default: null,
+    trim: true,
+  })
+  bankTrxId?: string;
+
+  @Prop({
+    type: String,
+    default: null,
+    trim: true,
+  })
+  cardType?: string;
+
+  @Prop({
+    type: String,
+    default: null,
+    unique: true,
+    trim: true,
+  })
+  validationId?: string;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

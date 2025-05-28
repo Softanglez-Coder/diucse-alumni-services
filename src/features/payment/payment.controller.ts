@@ -76,4 +76,10 @@ export class PaymentController {
     const url: string = `${process.env.PAYMENT_CANCEL_REDIRECT_URL}?paymentId=${handled.id}`;
     return res.redirect(url);
   }
+
+  @Roles(Role.ADMIN, Role.ACCOUNTANT)
+  @Post(':id/refund')
+  async refund(@Param('id') id: string) {
+    return await this.service.refund(id);
+  }
 }

@@ -45,4 +45,23 @@ export class SSLComz {
       );
     }
   }
+
+  async refund(trxId: string) {
+    const store_id = process.env.SSL_COMMERZ_STORE_ID;
+    const store_passwd = process.env.SSL_COMMERZ_STORE_PASSWORD;
+    const is_live = process.env.SSL_COMMERZ_IS_LIVE === 'true';
+
+    const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+
+    try {
+      const response = await sslcz.initiateRefund(trxId);
+      return response;
+    } catch (error) {
+      this.logger.error('SSL Commerce refund error:', error);
+      throw new HttpException(
+        'SSL Commerce refund failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

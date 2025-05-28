@@ -60,6 +60,11 @@ export class PaymentService {
       email: dto.customer.email,
       referenceId: dto.product?.id,
       status: PaymentStatus.PENDING,
+      cardNo: null,
+      cardType: null,
+      bankTrxId: null,
+      cardIssuer: null,
+      cardBrand: null,
     };
 
     const created = await this.repository.create(payment);
@@ -96,7 +101,17 @@ export class PaymentService {
   }
 
   async handleIPN(payload: IPNDto) {
-    const { status, tran_id: trxId, store_amount } = payload;
+    const {
+      status,
+      tran_id: trxId,
+      store_amount,
+      val_id,
+      card_type,
+      card_no,
+      bank_tran_id,
+      card_issuer,
+      card_brand,
+    } = payload;
 
     // Validate the transaction ID
     if (!trxId) {
@@ -131,6 +146,12 @@ export class PaymentService {
 
     payment.status = parseStatus();
     payment.depositAmount = store_amount;
+    payment.validationId = val_id;
+    payment.cardNo = card_no;
+    payment.cardType = card_type;
+    payment.bankTrxId = bank_tran_id;
+    payment.cardIssuer = card_issuer;
+    payment.cardBrand = card_brand;
 
     const updated = await this.repository.update(payment.id, payment);
 
@@ -144,8 +165,9 @@ export class PaymentService {
     if (payment.status === PaymentStatus.COMPLETED) {
       const body = `
       <p>Hello,</p>
-      <p>Your payment of ${payment.amount} BDT for ${payment.remarks} has been successfully completed.</p>
+      <p>Your payment of ${payment.amount} BDT via ${payment.cardBrand} for ${payment.remarks} has been successfully completed.</p>
       <p>Transaction ID: ${payment.trxId}</p>
+      <p>Bank Transaction ID: ${payment.bankTrxId}</p>
       <p>Thank you for your payment!</p>
       `;
 
@@ -160,6 +182,40 @@ export class PaymentService {
           `Failed to send payment confirmation email: ${error.message}`,
         );
       }
+    }
+
+    return updated;
+  }
+
+  async refund(id: string) {
+    if (!id) {
+      throw new BadRequestException('Payment ID is required for refund');
+    }
+
+    const payment: PaymentDocument = await this.repository.findById(id);
+    if (!payment) {
+      throw new NotFoundException('Payment record not found');
+    }
+
+    if (payment.status !== PaymentStatus.COMPLETED) {
+      throw new HttpException(
+        'Only completed payments can be refunded',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Here you would call the provider's refund method
+    // For example: await this.provider.refund(payment.trxId);
+
+    // Simulating refund success
+    payment.status = PaymentStatus.REFUNDED;
+    const updated = await this.repository.update(payment.id, payment);
+
+    if (!updated) {
+      throw new HttpException(
+        'Failed to update payment record after refund',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     return updated;
